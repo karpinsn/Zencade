@@ -1,0 +1,158 @@
+Command line install
+256mb for swap
+sudo apt-get update
+sudo aptitude install xorg
+startx
+sudo apt-get install sdlmame
+sudo apt-get install joystick
+sudo apt-get install sdl-mame
+sudo apt-get install python-chardet
+sudo apt-get install python-pygame
+sudo apt-get -f install
+wget http://www.anti-particle.com/projects/wahcade/wahcade_0.99pre8_all.deb
+dpkg -i wahcade_0.99pre8_all.deb
+     mkdir /home/mame/emulators;
+     mkdir /home/mame/emulators/mame;
+     mkdir /home/mame/emulators/mame/roms;
+     mkdir /home/mame/emulators/mame/cpanel;
+     mkdir /home/mame/emulators/mame/flyers;
+     mkdir /home/mame/emulators/mame/marquees;
+     mkdir /home/mame/emulators/mame/snap;
+     mkdir /home/mame/emulators/mame/cfg;
+     mkdir /home/mame/emulators/mame/nvram;
+     mkdir /home/mame/emulators/mame/memcard;
+     mkdir /home/mame/emulators/mame/inp;
+     mkdir /home/mame/emulators/mame/sta;
+     mkdir /home/mame/emulators/mame/diff;
+     mkdir /home/mame/emulators/mame/comments;
+
+sudo apt-get install ffmpeg
+sudo apt-get install gstreamer0.10-ffmpeg
+
+startx
+xrandr --size 1024x768
+
+sudo apt-get install ssh
+sudo apt-get install unzip
+
+unzip Catver.ini.zip -d /home/mame/emulators/mame/
+unzip controls.ini.zip -d /home/mame/emulators/mame/
+unzip history.dat.zip -d /home/mame/emulators/mame/
+sudo wget http://www.alphaboxmedia.net/packages/mame.ini -O /etc/sdlmame/mame.ini
+sudo chown root:root /etc/sdlmame/mame.ini
+sudo chmod 644 /etc/sdlmame/mame.ini
+sudo chown -R mame:mame /home/mame/emulators
+sudo wget http://www.alphaboxmedia.net/packages/wahcade.zip -O /home/mame/wahcade.zip
+sudo unzip /home/mame/wahcade.zip -d /home/mame/
+sudo chmod 744 -R /home/mame/.wahcade
+sudo chown mame:mame -R /home/mame/.wahcade
+sudo rm /home/mame/wahcade.zip
+
+sudo apt-get install mingetty
+sudo /etc/init/tty1.conf
+//	Change last line to 
+exec /sbin/mingetty --autologin mame --noclear tty1
+
+sudo nano ~/.profile
+//	Append to the end
+# Start X on boot
+if [ $(tty) == /dev/tty1 ]; then
+	startx;
+fi
+
+
+
+
+
+sudo apt-get install remastersys
+http://ubuntuforums.org/showthread.php?t=688872
+
+
+
+
+
+
+export WORK=~/work
+export CD=~/cd
+export FORMAT=squashfs
+export FS_DIR=casper
+
+sudo mkdir -p ${CD}/{${FS_DIR},boot/grub} ${WORK}/rootfs
+sudo apt-get update
+sudo apt-get install mkisofs squashfs-tools
+
+sudo rsync -av --one-file-system --exclude=/proc/* --exclude=/dev/* --exclude=/sys/* --exclude=/tmp/* --exclude=/lost+found --exclude=${WORK}/* --exclude=${CD}/* / ${WORK}/rootfs
+
+sudo mount -o bind /dev/ ${WORK}/rootfs/dev
+sudo mount -t proc proc ${WORK}/rootfs/proc
+sudo mount -t sysfs sysfs ${WORK}/rootfs/sys
+sudo chroot ${WORK}/rootfs /bin/bash
+LANG=
+apt-get update
+apt-get install casper xresprobe
+
+depmod -a $(uname -r)
+update-initramfs -u -k $(uname -r)
+apt-get clean
+rm -r /tmp/* /root/* 2>/dev/null
+rm  /boot/*.bak 2>/dev/null
+
+find /var/run /var/log /var/mail /var/spool /var/lock /var/backups /var/tmp -type f -exec rm {} \;
+
+for i in dpkg.log lastlog mail.log syslog auth.log daemon.log faillog lpr.log mail.warn user.log boot debug mail.err messages wtmp bootstrap.log dmesg kern.log mail.info
+do
+	touch /var/log/${i}
+done
+
+exit
+
+sudo cp -vp ${WORK}/rootfs/boot/vmlinuz-$(uname -r) ${CD}/boot/vmlinuz
+sudo cp -vp ${WORK}/rootfs/boot/initrd.img-$(uname -r) ${CD}/boot/initrd.gz
+sudo cp -vp ${WORK}/rootfs/boot/memtest86+.bin ${CD}/boot
+
+sudo umount ${WORK}/rootfs/proc
+sudo umount ${WORK}/rootfs/sys
+sudo umount ${WORK}/rootfs/dev
+sudo mksquashfs ${WORK}/rootfs ${CD}/${FS_DIR}/filesystem.${FORMAT}
+
+sudo find /boot /usr/lib/grub/ -iname 'stage2_eltorito' -exec cp -v {} ${CD}/boot/grub \;
+sudo nano ${CD}/boot/grub/menu.lst
+<!--
+# By default, boot the first entry.
+default 0
+
+# Boot automatically after 30 secs.
+timeout 30
+
+color cyan/blue white/blue
+
+
+title		Start Linux in Graphical Mode
+kernel		/boot/vmlinuz BOOT=casper boot=casper nopersistent rw quiet splash
+initrd		/boot/initrd.gz
+
+title		Start Linux in Safe Graphical Mode
+kernel		/boot/vmlinuz BOOT=casper boot=casper xforcevesa rw quiet splash
+initrd		/boot/initrd.gz
+
+title		Start Linux in Text Mode
+kernel		/boot/vmlinuz BOOT=casper boot=casper nopersistent textonly rw quiet
+initrd		/boot/initrd.gz
+
+title		Start Presistent Live CD
+kernel		/boot/vmlinuz BOOT=casper boot=casper persistent rw quiet splash
+initrd		/boot/initrd.gz
+
+title		Start Linux Graphical Mode from RAM
+kernel		/boot/vmlinuz BOOT=casper boot=casper toram nopersistent rw quiet splash
+initrd		/boot/initrd.gz
+
+title		Memory Test
+kernel		/boot/memtest86+.bin
+
+title		Boot the First Hard Disk
+root		(hd0)
+chainloader +1
+-->
+
+sudo mkisofs -b boot/grub/stage2_eltorito -no-emul-boot -boot-load-size 4 -boot-info-table -V "Custom Live CD" -cache-inodes -r -J -l -o ~/live-cd.iso $CD
