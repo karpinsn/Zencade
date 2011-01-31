@@ -1,69 +1,89 @@
-##	Do this on the Ubuntu system
-sudo uck-remaster-clean
-sudo uck-remaster-unpack-iso ubuntu-mini-remix-10.10-i386.iso
-sudo uck-remaster-unpack-rootfs
-sudo uck-remaster-chroot-rootfs
+#!/bin/sh
 
-## Now we are in the iso
-## We need to uncoment the universe sources
-nano /etc/apt/sources.list
+while :
+do
+ clear
+ echo "---------- Zencade Creation Script ----------"
+ echo "               Ubuntu 10.10                  "
+ echo " "
+ echo " 1. Download Ubuntu Mini Remix"
+ echo " 2. Mount image file system"
+ echo " 22. Reenter the iso without cleaning"
+ echo " 3. Create Roms & Snaps Directory"
+ echo " 4. Copy Roms & Snaps"
+ echo " 5. Clean unmount and repack image" 
+ echo " 9. Exit"
+ echo " "
+ echo " Please enter option [1 - 4 or 9]"
+ read opt
+ case $opt in
 
-## Install Dependencies
-apt-get update
-apt-get install git
-apt-get install xorg
-apt-get install sdlmame
-apt-get install joystick
-apt-get install sdlmame-tools
-apt-get install python-chardet
-apt-get install python-pygame
-apt-get install ffmpeg
-apt-get install gstreamer0.10-ffmpeg
+ 1) clear;
+    echo "Downloading Ubuntu mini remix 10.10";
+    wget -c http://www.ubuntu-mini-remix.org/download/10.10/ubuntu-mini-remix-10.10-i386.iso -O base.iso; 
+    echo "Complete, Press [enter] to continue";
+    read enterKey;;
 
-## Install WahCade
-cd /tmp
-wget http://www.anti-particle.com/projects/wahcade/wahcade_0.99pre8_all.deb
-dpkg -i wahcade_0.99pre8_all.deb
-apt-get -f install
-dpkg -i wahcade_0.99pre8_all.deb
+ 2) clear;
+    echo "Installing Ubuntu Customization Kit";
+    sudo apt-get install uck;
 
-mkdir /usr/local/share/emulators;
-mkdir /usr/local/share/emulators/mame;
-mkdir /usr/local/share/emulators/mame/roms;
-mkdir /usr/local/share/emulators/mame/cpanel;
-mkdir /usr/local/share/emulators/mame/flyers;
-mkdir /usr/local/share/emulators/mame/marquees;
-mkdir /usr/local/share/emulators/mame/snap;
-mkdir /usr/local/share/emulators/mame/cfg;
-mkdir /usr/local/share/emulators/mame/nvram;
-mkdir /usr/local/share/emulators/mame/memcard;
-mkdir /usr/local/share/emulators/mame/inp;
-mkdir /usr/local/share/emulators/mame/sta;
-mkdir /usr/local/share/emulators/mame/diff;
-mkdir /usr/local/share/emulators/mame/comments;
-mkdir /etc/sdlmame
-mkdir /usr/share/xsessions
+    echo "Mounting the image file system";
+    ##	Do this on the Ubuntu system
+    sudo uck-remaster-clean;
+    sudo uck-remaster-unpack-iso base.iso;
+    sudo uck-remaster-unpack-rootfs;
+    sudo cp InnerScript.sh /tmp/InnerScript.sh;
+    sudo chmod go+rx /tmp/InnerScript.sh;
+    sudo uck-remaster-chroot-rootfs ~/tmp /tmp/InnerScript.sh;
+    ## Now we are in the iso
+    echo "Complete, Press [enter] to continue";
+    read enterKey;;
 
-## Setup WahCade
-git clone git://github.com/karpinsn/Zencade.git Zencade
-mv Zencade/mameFiles/Catver.ini /usr/local/share/emulators/mame/Catver.ini
-mv Zencade/mameFiles/controls.ini /usr/local/share/emulators/mame/controls.ini
-mv Zencade/mameFiles/history.dat /usr/local/share/emulators/mame/history.dat
-mv Zencade/mameFiles/mame.ini /etc/sdlmame/mame.ini
-mv Zencade/mameFiles/arcade.desktop /usr/share/xsessions/arcade.desktop
+ 22) clear;
+    echo "Reentering the iso without cleaning"    
+    sudo cp InnerScript.sh /tmp/InnerScript.sh;
+    sudo chmod go+rx /tmp/InnerScript.sh;
+    sudo uck-remaster-chroot-rootfs ~/tmp /tmp/InnerScript.sh;
+    ## Now we are in the iso
+    echo "Complete, Press [enter] to continue";
+    read enterKey;;
 
+ 3) clear;
+    echo "Creating Roms & Snaps directory"
 
-wget http://www.alphaboxmedia.net/packages/wahcade.zip -O /home/mame/wahcade.zip;
-unzip /home/mame/wahcade.zip -d /home/mame/;
+    mkdir Roms;
+    mkdir Snaps;
 
-## Clean up leftovers
-apt-get autoclean
-rm /var/cache/apt/archives/*.deb
-rm /tmp/*
+    echo "Exit the script and place the roms in the Roms directory"
+    echo "and the snaps in the Snaps directory"
 
-## Exit the iso
-exit
+    echo "Complete, Press [enter] to continue";
+    read enterKey;;
 
-## Repack the iso
-sudo uck-remaster-pack-rootfs
-sudo uck-remaster-pack-iso Zencade.iso
+ 4) clear;
+    echo "Copying Roms & Snaps to image";
+    sudo cp -r ./Roms/* ~/tmp/remaster-root/home/mame/emulators/mame/roms/
+    sudo cp -r ./Snaps/* ~/tmp/remaster-root/home/mame/emulators/mame/snap/
+
+    echo "Complete, Press [enter] to continue";
+    read enterKey;;
+
+ 5) clear;
+    echo "Repack the iso";
+    sudo uck-remaster-pack-rootfs;
+    sudo uck-remaster-pack-iso Zencade.iso;
+    echo "Complete, Press [enter] to continue";
+    read enterKey;;
+
+ 9) clear;
+    echo "Bye $USER";
+    exit 1;;
+
+ *) clear;
+    echo "Invalid option: $opt. Please select a valid option";
+    echo "Press [enter] key to continue";
+    read enterKey;;
+
+esac
+done
