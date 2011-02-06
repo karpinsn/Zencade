@@ -39,9 +39,14 @@ do
     cd /tmp;
     wget http://www.anti-particle.com/projects/wahcade/wahcade_0.99pre8_all.deb;
     dpkg -i wahcade_0.99pre8_all.deb;
-    apt-get -f install;
+    apt-get -f -y install;
     dpkg -i wahcade_0.99pre8_all.deb;
-   
+
+    echo "Setting up X";
+    mkdir /home/ubuntu;
+    touch /home/ubuntu/.profile;
+    echo "if [ -z \"\$DISPLAY\" ] && [ \$(tty) == /dev/tty1 ]; then startx fi" >> /home/ubuntu/.profile;
+
     echo "Complete, Press [enter] to continue";
     read enterKey;;
 
