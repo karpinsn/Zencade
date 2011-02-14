@@ -8,7 +8,8 @@ do
  echo " "
  echo " 1. Install dependencies"
  echo " 2. Setup Mame"
- echo " 3. Cleanup leftovers"
+ echo " 3. Setup WahCade"
+ echo " 4. Cleanup leftovers"
  echo " 9. Exit"
  echo " "
  echo "Please enter option [1 - 2 or 9]"
@@ -34,6 +35,8 @@ do
     apt-get -y install python-pygame;
     apt-get -y install ffmpeg;
     apt-get -y install gstreamer0.10-ffmpeg;
+    apt-get -y install alsa-base alsa-utils;
+    apt-get -y install linux-sound-base;
 
     echo "Installing WahCade"
     cd /tmp;
@@ -45,7 +48,9 @@ do
     echo "Setting up X";
     mkdir /home/ubuntu;
     touch /home/ubuntu/.profile;
-    echo "if [ -z \"\$DISPLAY\" ] && [ \$(tty) == /dev/tty1 ]; then startx fi" >> /home/ubuntu/.profile;
+    echo "if [ -z \"\$DISPLAY\" ] && [ \$(tty) == /dev/tty1 ]; then" >> /home/ubuntu/.profile;
+    echo "startx" >> /home/ubuntu/.profile;
+    echo "fi" >> /home/ubuntu/.profile;
 
     echo "Complete, Press [enter] to continue";
     read enterKey;;
@@ -55,6 +60,8 @@ do
 
     mkdir /home/mame; 
     mkdir /home/mame/emulators;
+    ln -s /home/mame/emulators /home/ubuntu/emulators;
+    ln -s /home/mame/emulators ~/emulators;
     mkdir /home/mame/emulators/mame;
     mkdir /home/mame/emulators/mame/roms;
     mkdir /home/mame/emulators/mame/cpanel;
@@ -82,22 +89,25 @@ do
     
     wget http://www.alphaboxmedia.net/packages/wahcade.zip -O /home/mame/wahcade.zip;
     unzip /home/mame/wahcade.zip -d /home/mame/;
+    ln -s /home/mame/.wahcade /home/ubuntu/.wahcade;
+    ln -s /home/mame/.wahcade ~/.wahcade;
     rm /home/mame/wahcade.zip;
   
-    echo "Setting permissions";
-    chown root:root /etc/sdlmame/mame.ini;
-    chmod 644 /etc/sdlmame/mame.ini;
-
-    chown root:root /usr/share/xsessions/arcade.desktop;
-    chmod 644 /usr/share/xsessions/arcade.desktop;
-
-    chmod 744 -R /home/mame/.wahcade;
-    chown root:root -R /home/mame/.wahcade;
+    echo "Setting permissions"; 
+    chmod 777 /etc/sdlmame/mame.ini;
+    chmod 777 /usr/share/xsessions/arcade.desktop;
+    chmod 777 -R /home/mame/.wahcade;
 
     echo "Complete, Press [enter] to continue";
     read enterKey;;
 
  3) clear;
+    echo "Setting and Configurating WahCade"
+    wahcade-setup;
+    echo "Complete, Press [enter] to continue";
+    read enterKey;;
+
+ 4) clear;
     echo "Unmounting iso and repacking filesystem";
 
     echo "Cleaning up leftovers";
